@@ -1,0 +1,36 @@
+# This file was created by the command:
+# steps/nnet3/xconfig_to_configs.py --xconfig-file exp2/chain/tdnn_a_all_sp/configs/network.xconfig --config-dir exp2/chain/tdnn_a_all_sp/configs/
+# It is a copy of the source from which the config files in # this directory were generated.
+
+input dim=71 name=input
+conv-relu-batchnorm-layer name=cnn1 l2-regularize=0.005 height-in=71 height-out=71 time-offsets=-1,0,1 height-offsets=-1,0,1 num-filters-out=32
+linear-component name=cnn2 dim=284 orthonormal-constraint=1.0
+# the first splicing is moved before the lda layer, so no splicing here
+relu-batchnorm-dropout-layer name=tdnn1 l2-regularize=0.03 dropout-proportion=0.0 dropout-per-dim-continuous=true dim=1280
+tdnnf-layer name=tdnnf2 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=1
+tdnnf-layer name=tdnnf3 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=1
+tdnnf-layer name=tdnnf4 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=1
+tdnnf-layer name=tdnnf5 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=0
+tdnnf-layer name=tdnnf6 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf7 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf8 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf9 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf10 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf11 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf12 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf13 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf14 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf15 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf16 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf17 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf18 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+tdnnf-layer name=tdnnf19 l2-regularize=0.03 dropout-proportion=0.0 bypass-scale=0.66 dim=1280 bottleneck-dim=256 time-stride=3
+linear-component name=prefinal-l dim=512 orthonormal-constraint=1.0
+
+## adding the layers for chain branch
+prefinal-layer name=prefinal-chain input=prefinal-l l2-regularize=0.03 small-dim=512 big-dim=1280
+output-layer name=output include-log-softmax=false dim=2170 l2-regularize=0.015
+
+# adding the layers for xent branch
+prefinal-layer name=prefinal-xent input=prefinal-l l2-regularize=0.03 small-dim=512 big-dim=1280
+output-layer name=output-xent dim=2170 learning-rate-factor=5.0 l2-regularize=0.015
