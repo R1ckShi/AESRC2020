@@ -7,7 +7,7 @@ raw_data=rdata     # raw data with metadata, txt and wav
 data=kdata         # data transformed into kaldi format
 zipped_data=$raw_data/AESRC2020.zip 
 
-stage=5
+stage=7
 feature_cmd="run.pl"
 nj=50
 
@@ -59,51 +59,47 @@ fi
 if [ $stage -le 4 ];then 
     ./utils/fix_data_dir.sh $data/data_all
     ./steps/make_fbank.sh --cmd $feature_cmd --nj $nj --fbank-config $raw_data/fbank.conf $data/data_all $data/feats/log $data/feats/ark
-    ./steps/compute_cmvn_stats.sh $data/data_all $data/feats/log $data/feats/ark
+    ./steps/compute_cmvn_stats.sh $data/data_all $data/feats/log $data/feats/ark # for kaldi 
 fi
 
 
 # divide development set for cross validation
 if [ $stage -le 5 ];then 
     for i in US UK IND CHN JPN PT RU KR;do 
-        ./utils/subset_data_dir.sh --spk-list $raw_data/cvlist/${i}_cv_spk $data/data_all $data/cv/$i 
+        ./utils/subset_data_dir.sh --spk-list local/files/cvlist/${i}_cv_spk $data/data_all $data/cv/$i 
         cat $data/cv/$i/feats.scp >> $data/cv.scp 
     done
     ./utils/filter_scp.pl --exclude $data/cv.scp $data/data_all/feats.scp > $data/train.scp 
     ./utils/subset_data_dir.sh --utt-list $data/train.scp $data/data_all $data/train
+	./utils/subset_data_dir.sh --utt-list $data/cv.scp $data/data_all $data/cv_all
+	compute-cmvn-stats scp:$data/train/feats.scp `pwd`/$data/train/dump_cmvn.ark # for espnet
     rm $data/cv.scp $data/train.scp 
 fi
 
 
-# generate L and complie G.fst for kaldi decoding
+# generate label file and dump features for track2:E2E
 if [ $stage -le 6 ];then 
-	mkdir $data/local/dict
-	# mv your own lexicon to $data/local/dict/
-	cut -f 2 $data/train/text > $data/train/trans
-	./local/prepare_lang.sh $data $data/train/trans
+    for i in US UK IND CHN JPN PT RU KR;do 
+        local/dump.sh --cmd $feature_cmd --nj 3 --do_delta false \
+            $data/cv/$i/feats.scp $data/train/dump_cmvn.ark $data/cv/$i/dump/log $data/cv/$i/dump # for track2 e2e testing
+    done 
+    local/dump.sh --cmd $feature_cmd --nj $nj  --do_delta false \
+        $data/train/feats.scp $data/train/dump_cmvn.ark $data/train/dump/log $data/train/dump
+    local/dump.sh --cmd $feature_cmd --nj $nj  --do_delta false \
+        $data/cv_all/feats.scp $data/train/dump_cmvn.ark $data/cv_all/dump/log $data/cv_all/dump # for track1 testing
 fi
-# data preperation for track2:Kaldi finished
 
 
 # generate label file for track1
 if [ $stage -le 7 ];then 
-    for i in cv/US cv/UK cv/IND cv/CHN cv/JPN cv/PT cv/RU cv/KR train;do 
-        cut -d '	' -f 1 $i/text > $i/uttlist 
-        cut -d '-' -f 1 $i/text | sed -e "s:^:<:g" -e "s:$:>:g" > $i/accentlist
-        paste $i/uttlist $i/accentlist > $i/text.track1 
-        rm $i/uttlist $i/accentlist
+    for i in train cv_all;do 
+        cut -f 1 $data/$i/text > $data/$i/uttlist 
+        cut -d '-' -f 1 $data/$i/text | sed -e "s:^:<:g" -e "s:$:>:g" > $data/$i/accentlist
+        paste $data/$i/uttlist $data/$i/accentlist > $data/$i/utt2accent 
+        rm $data/$i/uttlist
+		local/data2json.sh --nj 20 --feat $data/$i/dump/feats.scp --text $data/$i/utt2accent --oov 8 $data/$i local/files/ar.dict > $data/$i/ar.json
 	done
 fi    
-
-# generate label file and dump features for track2:E2E
-if [ $stage -le 8 ];then 
-    for i in US UK IND CHN JPN PT RU KR;do 
-        dump.sh --cmd $feature_cmd --nj 3 --do_delta false \
-            $data/cv/$i/feats.scp $data/feats/ark/cmvn_data_all.ark $data/cv/$i/dump/log $data/cv/$i/dump
-    done 
-    dump.sh --cmd $feature_cmd --nj $nj  --do_delta false \
-        $data/train/feats.scp $data/feats/ark/cmvn_data_all.ark $data/train/dump/log $data/train/dump
-fi
 
 echo "local/prepare_data.sh succeeded"
 exit 0;
