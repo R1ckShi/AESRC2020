@@ -87,6 +87,18 @@ if [ $stage -le 6 ];then
         $data/train/feats.scp $data/train/dump_cmvn.ark $data/train/dump/log $data/train/dump
     local/dump.sh --cmd $feature_cmd --nj $nj  --do_delta false \
         $data/cv_all/feats.scp $data/train/dump_cmvn.ark $data/cv_all/dump/log $data/cv_all/dump # for track1 testing
+    # for track1, utterance-level CMVN is applied
+    for data_set in train cv_all; do
+        set_dir=$data/$data_set
+        # hack to set utterance-level spk2utt & utt2spk
+        awk '{printf "%s %s\n", $1, $1 }' $set_dir/text > $set_dir/spk2utt.utt
+        cp $set_dir/spk2utt.utt $set_dir/utt2spk.utt
+        compute-cmvn-stats --spk2utt=ark:$set_dir/spk2utt.utt scp:$set_dir/feats.scp \
+            ark,scp:`pwd`/$set_dir/cmvn_utt.ark,$set_dir/cmvn_utt.scp
+        local/dump_spk_yzl23.sh --cmd slurm.pl --nj 48 \
+            $set_dir/feats.scp $set_dir/cmvn_utt.scp \
+            exp/dump_feats/$data_set $set_dir/dump_utt $set_dir/utt2spk.utt
+    done
 fi
 
 
@@ -97,7 +109,7 @@ if [ $stage -le 7 ];then
         cut -d '-' -f 1 $data/$i/text | sed -e "s:^:<:g" -e "s:$:>:g" > $data/$i/accentlist
         paste $data/$i/uttlist $data/$i/accentlist > $data/$i/utt2accent 
         rm $data/$i/uttlist
-		local/data2json.sh --nj 20 --feat $data/$i/dump/feats.scp --text $data/$i/utt2accent --oov 8 $data/$i local/files/ar.dict > $data/$i/ar.json
+		local/data2json.sh --nj 20 --feat $data/$i/dump_utt/feats.scp --text $data/$i/utt2accent --oov 8 $data/$i local/files/ar.dict > $data/$i/ar.json
 	done
 fi    
 

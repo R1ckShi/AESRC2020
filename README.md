@@ -27,7 +27,7 @@ Data preparation scripts and training pipeline for the Interspeech 2020 Accented
 
  **口音识别赛道 AR Track** 
 
-训练Track1 ESPnet AR模型 `./local/track1_espnet_ar.sh`
+训练Track1 ESPnet AR模型 `./local/track1_espnet_transformer_train.sh`
 
  **语音识别赛道 ASR Track** 
 
@@ -45,6 +45,13 @@ Data preparation scripts and training pipeline for the Interspeech 2020 Accented
 #### 基线实验结果
 
 **Track1基线实验结果** 
+
+| Model    | RU   | KR   | US   | PT   | JPN  | UK   | CHN  | IND  | AVE  |
+| -------- | -- |---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| Transformer-6L  | 34.0 | 43.7 | 30.6 | 65.7 | 44.0 | 74.5 | 50.9 | 75.2 | 52.2 |
+| Transformer-12L | 49.6 | 26.0 | 21.2 | 51.8 | 42.7 | 85.0 | 38.2 | 66.1 | 47.8 |
+| + ASR-init      | 75.7 | 55.6 | 60.2 | 85.5 | 73.2 | 93.9 | 67.0 | 97.0 | 76.1 |
+
 
 **Track2基线实验结果** 
 
