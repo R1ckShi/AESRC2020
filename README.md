@@ -33,7 +33,7 @@ Data preparation scripts and training pipeline for the Interspeech 2020 Accented
 
 1.  训练Track2 Kaldi GMM对齐模型  `./local/track2_kaldi_gmm_train.sh`
 2.  生成Lattice，决策树，训练Track2 Kaldi Chain Model  `./local/track2_kaldi_chain_train.sh`
-3.  训练Track2 ESPnet Transformer模型（Track2 ESPnet RNN语言模型） `./local/track2_espnet_transformer.sh`
+3.  训练Track2 ESPnet Transformer模型（Track2 ESPnet RNN语言模型） `./local/track2_espnet_transformer_train.sh`
 
 **注意**
 1.  官方不提供Kaldi模型所需的英文的发音词典
@@ -61,5 +61,5 @@ Kaldi Hybrid Chain Model: CNN + 18 TDNN
 
 ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joint training used, 1k sub-word BPE)
 
-详细超参数见`./files/conf/`目录中模型配置与相关脚本中的设置
+详细超参数见`./local/files/conf/`目录中模型配置与相关脚本中的设置
 ![输入图片说明](https://images.gitee.com/uploads/images/2020/0911/221502_b412b116_8055062.png "track2.png")
