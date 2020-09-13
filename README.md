@@ -52,6 +52,7 @@ Data preparation scripts and training pipeline for the Interspeech 2020 Accented
 | Transformer-12L | 49.6 | 26.0 | 21.2 | 51.8 | 42.7 | 85.0 | 38.2 | 66.1 | 47.8 |
 | + ASR-init      | 75.7 | 55.6 | 60.2 | 85.5 | 73.2 | 93.9 | 67.0 | 97.0 | 76.1 |
 
+Transformer-6L、Transformer-12L均使用`./local/track1_espnet_transformer_train.sh`训练（elayers分别为6、12），ASR-init实验使用Track2中Joint CTC/Attention模型进行初始化
 
 **Track2基线实验结果** 
 
