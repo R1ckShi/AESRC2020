@@ -7,9 +7,11 @@ raw_data=rdata     # raw data with metadata, txt and wav
 data=kdata         # data transformed into kaldi format
 zipped_data=$raw_data/AESRC2020.zip 
 
-stage=7
+stage=1
 feature_cmd="run.pl"
 nj=50
+
+vocab_size=1000
 
 
 # unzip and rename each accent
@@ -84,9 +86,9 @@ if [ $stage -le 6 ];then
             $data/cv/$i/feats.scp $data/train/dump_cmvn.ark $data/cv/$i/dump/log $data/cv/$i/dump # for track2 e2e testing
     done 
     local/dump.sh --cmd $feature_cmd --nj $nj  --do_delta false \
-        $data/train/feats.scp $data/train/dump_cmvn.ark $data/train/dump/log $data/train/dump
-    local/dump.sh --cmd $feature_cmd --nj $nj  --do_delta false \
-        $data/cv_all/feats.scp $data/train/dump_cmvn.ark $data/cv_all/dump/log $data/cv_all/dump # for track1 testing
+        $data/train/feats.scp $data/train/dump_cmvn.ark $data/train/dump/log $data/train/dump # for track2 e2e training
+    # local/dump.sh --cmd $feature_cmd --nj $nj  --do_delta false \
+    #    $data/cv_all/feats.scp $data/train/dump_cmvn.ark $data/cv_all/dump/log $data/cv_all/dump # for track1 testing
     # for track1, utterance-level CMVN is applied
     for data_set in train cv_all; do
         set_dir=$data/$data_set
@@ -112,6 +114,36 @@ if [ $stage -le 7 ];then
 		local/data2json.sh --nj 20 --feat $data/$i/dump_utt/feats.scp --text $data/$i/utt2accent --oov 8 $data/$i local/files/ar.dict > $data/$i/ar.json
 	done
 fi    
+
+
+# generate label file for track2 e2e 
+if [ $stage -le 8 ];then 
+	# goolgle sentence piece toolkit is used to train a bpe model and decode
+	mkdir -p $data/bpe 
+	mkdir -p $data/lang 
+	# male sure you have installed sentencepiece successfully
+	/home/work_nfs3/xshi/workspace/sentencepiece/build/src/spm_train  \
+		--input=$data/train/trans_upper \
+		--model_prefix=$data/bpe/bpe_${vocab_size} \
+		--vocab_size=$vocab_size \
+		--character_coverage=1.0 \
+		--model_type=unigram
+	python local/word_frequency.py $data/train/trans_upper 0 $data/bpe/train 
+	cut -d ' ' -f 1 $data/bpe/train.enwf | awk '{if(NF==1)print $0}' > $data/bpe/wordlist.txt 
+	/home/work_nfs3/xshi/workspace/sentencepiece/build/src/spm_encode \
+		--model=$data/bpe/bpe_${vocab_size}.model  \
+		--output_format=piece < $data/bpe/wordlist.txt > $data/bpe/bpelist.txt 
+	paste $data/bpe/wordlist.txt $data/bpe/bpelist.txt > $data/lang/lexicon.txt
+	sed -i 's:▁ :▁:g' $data/lang/lexicon.txt 
+	python local/apply_lexicon.py $data/lang/lexicon.txt $data/train/text $data/train/utt2tokens "<unk>" $data/train/.warning $data/lang/units.txt 
+	local/data2json.sh --nj 20 --feat $data/train/dump/feats.scp --text $data/train/utt2tokens --oov 0 $data/train $data/lang/units.txt > $data/train/asr.json || exit 1;
+	for i in US UK IND CHN JPN PT RU KR; do 
+		# units.txt generate form cv set aborted  
+		python local/apply_lexicon.py $data/lang/lexicon.txt $data/cv/$i/text $data/cv/$i/utt2tokens "<unk>" $data/cv/$i/.warning $data/cv/${i}/.units.txt  || exit 1;
+		local/data2json.sh --nj 20 --feat $data/cv/$i/dump/feats.scp --text $data/cv/$i/utt2tokens --oov 0 $data/cv/$i $data/lang/units.txt > $data/cv/$i/asr.json
+	done 
+
+fi
 
 echo "local/prepare_data.sh succeeded"
 exit 0;
