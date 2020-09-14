@@ -85,7 +85,7 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
 </thead>
 <tbody>
   <tr>
-    <td rowspan="3"><br><br><br>Kaldi</td>
+    <td rowspan="3"><br><br>Kaldi</td>
     <td>Accent 160</td>
     <td rowspan="3">-</td>
     <td>6.67</td>
@@ -99,7 +99,7 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
     <td>13.68</td>
   </tr>
   <tr>
-    <td>Libri 960 + Accent 160 Retrain</td>
+    <td>Libri 960 ~ Accent 160</td>
     <td>6.61</td>
     <td>10.95</td>
     <td>15.33</td>
@@ -123,7 +123,7 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
     <td>13.14</td>
   </tr>
   <tr>
-    <td rowspan="5"><br><br><br><br><br>ESPnet</td>
+    <td rowspan="5"><br><br><br>ESPnet</td>
     <td>Accent 160</td>
     <td>+0.3 RNNLM</td>
     <td>5.26</td>
@@ -137,7 +137,7 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
     <td>8.63</td>
   </tr>
   <tr>
-    <td>Libri 960 + Accent 160 Retrain</td>
+    <td>Libri 960 ~ Accent 160</td>
     <td>+0.3 RNNLM</td>
     <td>4.6</td>
     <td>6.4</td>
@@ -150,8 +150,8 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
     <td>6.92</td>
   </tr>
   <tr>
-    <td rowspan="3"><br><br><br>Accent 160 + Libri160</td>
-    <td>+0.3 RNNLM + 0.3 CTC</td>
+    <td rowspan="3"><br><br>Accent 160 + Libri160</td>
+    <td>+0.3 RNNLM+0.3 CTC</td>
     <td>4.76</td>
     <td>7.81</td>
     <td>7.71</td>
@@ -188,3 +188,4 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
   </tr>
 </tbody>
 </table>
+* Data A ~ Data B指使用Data B fine-tune Data A训练的模型
