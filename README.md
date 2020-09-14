@@ -48,11 +48,12 @@ Data preparation scripts and training pipeline for the Interspeech 2020 Accented
 
 | Model    | RU   | KR   | US   | PT   | JPN  | UK   | CHN  | IND  | AVE  |
 | -------- | -- |---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| Transformer-3L  | 30.0 | 45.0 | 45.7 | 57.2 | 48.5 | 70.0 | 56.2 | 83.5 | 54.1 |
 | Transformer-6L  | 34.0 | 43.7 | 30.6 | 65.7 | 44.0 | 74.5 | 50.9 | 75.2 | 52.2 |
 | Transformer-12L | 49.6 | 26.0 | 21.2 | 51.8 | 42.7 | 85.0 | 38.2 | 66.1 | 47.8 |
 | + ASR-init      | 75.7 | 55.6 | 60.2 | 85.5 | 73.2 | 93.9 | 67.0 | 97.0 | 76.1 |
 
-Transformer-6L、Transformer-12L均使用`./local/track1_espnet_transformer_train.sh`训练（elayers分别为6、12），ASR-init实验使用Track2中Joint CTC/Attention模型进行初始化
+Transformer-3L、Transformer-6L、Transformer-12L均使用`./local/track1_espnet_transformer_train.sh`训练（elayers分别为6、12），ASR-init实验使用Track2中Joint CTC/Attention模型进行初始化
 
 *在cv集的结果上发现了某个语种的acc与说话人强相关的现象，由于cv集说话人较少，所以上述结果的绝对数值并不具备统计意义，测试集将包含更多的说话人
 
