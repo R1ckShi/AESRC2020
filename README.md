@@ -72,7 +72,7 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
     <th rowspan="2"></th>
     <th rowspan="2">Data</th>
     <th rowspan="2">Decode Related</th>
-    <th colspan="9">CER on cv set</th>
+    <th colspan="9">WER on cv set</th>
   </tr>
   <tr>
     <td>RU</td>
