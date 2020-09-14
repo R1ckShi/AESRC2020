@@ -20,10 +20,10 @@ resume=        # Resume the training from snapshot
 # feature configuration
 do_delta=false
 
-train_config=local/files/conf/espnet_train.conf
-lm_config=local/files/conf/espnet_lm.yaml
-decode_config=local/files/conf/espnet_decode.yaml
-preprocess_config=local/files/conf/espnet_specaug.yaml
+train_config=conf/espnet_train.conf
+lm_config=conf/espnet_lm.yaml
+decode_config=conf/espnet_decode.yaml
+preprocess_config=conf/espnet_specaug.yaml
 
 # rnnlm related
 lm_resume=         # specify a snapshot file to resume LM training

@@ -168,6 +168,6 @@ if [ -n "${out}" ]; then
     opts+="-O ${out}"
 fi
 
-local/merge_scp2json.py --verbose ${verbose} ${opts}
+local/tools/merge_scp2json.py --verbose ${verbose} ${opts}
 
 rm -fr ${tmpdir}

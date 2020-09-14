@@ -17,8 +17,8 @@ verbose=0      # verbose option
 resume=        # Resume the training from snapshot
 log=100
 
-preprocess_config=local/files/conf/specaug.yaml
-train_config=local/files/conf/track1_accent_transformer.yaml
+preprocess_config=conf/specaug.yaml
+train_config=conf/track1_accent_transformer.yaml
 
 # others
 accum_grad=2
@@ -99,6 +99,6 @@ fi
 
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     echo "stage 3: Analyze decoding results"
-    python ./local/parse_track1_jsons.py  ${expdir}/${decode_dir}/ar.json ${expdir}/${decode_dir}/result.txt
+    python ./local/tools/parse_track1_jsons.py  ${expdir}/${decode_dir}/ar.json ${expdir}/${decode_dir}/result.txt
 
 fi
