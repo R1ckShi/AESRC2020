@@ -1,50 +1,48 @@
 # AESRC2020
 
 
-#### 介绍
-
-Interspeech 2020 口音英语识别挑战赛数据准备相关脚本、训练流程代码与基线实验结果。
+#### Introduction
 
 Data preparation scripts and training pipeline for the Interspeech 2020 Accented English Speech Recognition Challenge (AESRC).
 
-#### 依赖环境
+#### Dependent Environment
 
-1.  安装Kaldi (数据准备有关功能脚本、Track2传统模型训练) 
-    [Github链接](https://github.com/kaldi-asr/kaldi)
-2.  安装ESPnet（Track1 E2E AR Model训练、Track2 E2E ASR Transformer训练）
-    [Github链接](https://github.com/espnet/espnet)
-3.  （可选）安装Google SentencePiece （Track2 E2E ASR 词表缩减、建模单元构建）
-    [Github链接](https://github.com/google/sentencepiece)
-4.  （可选）安装KenLM （N-gram语言模型训练）
-    [Github链接](http://https://github.com/kpu/kenlm)
+1.  Install Kaldi (Data preparation scripts, Track2 traditional ASR model training) 
+    [Github Link](https://github.com/kaldi-asr/kaldi)
+2.  Install ESPnet(Track1 E2E AR Model training, Track2 E2E ASR Transformer training)
+    [Github Link](https://github.com/espnet/espnet)
+3.  (Optional) Install Google SentencePiece (Track2 E2E ASR modeling units building)
+    [Github Link](https://github.com/google/sentencepiece)
+4.  (Optional) Install KenLM (N-gram language model training)
+    [Github Link](http://https://github.com/kpu/kenlm)
 
-#### 使用说明
+#### Usage
 
- **数据准备 Data Preparation** 
+ **Data Preparation** 
 
-1.  下载评测数据
-2.  准备数据，划分开发集，特征准备以及训练BPE模型 `./local/prepare_data.sh`
+1.  Download challenge data
+2.  Data preparation, divide cv set, feature extraction and bpe model training `./local/prepare_data.sh`
 
- **口音识别赛道 AR Track** 
+ **AR Track** 
 
-训练Track1 ESPnet AR模型 `./local/track1_espnet_transformer_train.sh`
+Train Track1 ESPnet AR model `./local/track1_espnet_transformer_train.sh`
 
- **语音识别赛道 ASR Track** 
+ **ASR Track** 
 
-1.  训练Track2 Kaldi GMM对齐模型  `./local/track2_kaldi_gmm_train.sh`
-2.  生成Lattice，决策树，训练Track2 Kaldi Chain Model  `./local/track2_kaldi_chain_train.sh`
-3.  训练Track2 ESPnet Transformer模型（Track2 ESPnet RNN语言模型） `./local/track2_espnet_transformer_train.sh`
+1.  Train Track2 Kaldi GMM alignment model  `./local/track2_kaldi_gmm_train.sh`
+2.  Generate Lattice, decision tree, Train Track2 Kaldi Chain Model  `./local/track2_kaldi_chain_train.sh`
+3.  Train Track2 ESPnet Transformer Model (Track2 ESPnet RNN Language Model) `./local/track2_espnet_transformer_train.sh`
 
-**注意**
-1.  官方不提供Kaldi模型所需的英文的发音词典
-2.  训练脚本中不包括数据扩充、添加Librispeech数据等，参赛者可按需添加
-3.  正确安装并激活Kaldi与ESPnet的环境之后才能运行相关脚本
-4.  ASR Track中Baseline提供了多种数据的组合、Librispeech全量数据预训练等试验结果
-5.  参赛者应严格按照评测中关于数据使用的相关规则训练模型，以确保结果的公平可比性
+**Notice**
+1.  There's no lexicon provided, please prepare it by yourself.
+2.  Data augment methods are not included in scirpts.
+3.  Install Kaldi and ESPnet and activate their envrionment then you can run the scripts.
+4.  Baseline experiments in Track2 include several data using methods.
+5.  Participants should obey the rules about data strictly.
 
-#### 基线实验结果
+#### Baseline Experiments Results
 
-**Track1基线实验结果** 
+**Track1** 
 
 | Model    | RU   | KR   | US   | PT   | JPN  | UK   | CHN  | IND  | AVE  |
 | -------- | -- |---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
@@ -53,19 +51,21 @@ Data preparation scripts and training pipeline for the Interspeech 2020 Accented
 | Transformer-12L | 49.6 | 26.0 | 21.2 | 51.8 | 42.7 | 85.0 | 38.2 | 66.1 | 47.8 |
 | + ASR-init      | 75.7 | 55.6 | 60.2 | 85.5 | 73.2 | 93.9 | 67.0 | 97.0 | 76.1 |
 
-Transformer-3L、Transformer-6L、Transformer-12L均使用`./local/track1_espnet_transformer_train.sh`训练（elayers分别为3、6、12），ASR-init实验使用Track2中Joint CTC/Attention模型进行初始化
+Transformer-3L, Transformer-6L, Transformer-12L all use`./local/track1_espnet_transformer_train.sh` (elayers: 3, 6, 12)
 
-*在cv集的结果上发现了某个语种的acc与说话人强相关的现象，由于cv集说话人较少，所以上述结果的绝对数值并不具备统计意义，测试集将包含更多的说话人
+ASR-init uses encoder in Track2 to initialize self-attention parameters
 
-**Track2基线实验结果** 
+*In cv sets, we found that the acc of some accent is strongly related with speaker. As there are few speakers in cv sets, the absolute value above is not statistically significant, and the test set will contain more speakers
+
+**Track2** 
 
 Kaldi Hybrid Chain Model: CNN + 18 TDNN
-*基于内部的非开源英文发音词典
-*随后会公布基于CMU词典的结果
+*Based on internal non open source dictionary
+*Results on CMU dict comes up soon
 
 ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joint training used, 1k sub-word BPE)
 
-详细超参数见`./local/files/conf/`目录中模型配置与相关脚本中的设置
+You can find detailed hyperparameters settings in `./local/files/conf/` and training scripts
 <table>
 <thead>
   <tr>
@@ -191,4 +191,4 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
   </tr>
 </tbody>
 </table>
-* Data A ~ Data B指使用Data B fine-tune Data A训练的模型
+* Data A ~ Data B means fine-tune Data A model with Data B
