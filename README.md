@@ -85,8 +85,8 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
 </thead>
 <tbody>
   <tr>
-    <td rowspan="3"><br><br>Kaldi</td>
-    <td>Accent 160</td>
+    <td rowspan="3">Kaldi<br></td>
+    <td>Accent160</td>
     <td rowspan="3">-</td>
     <td>6.67</td>
     <td>11.46</td>
@@ -99,7 +99,7 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
     <td>13.68</td>
   </tr>
   <tr>
-    <td>Libri 960 ~ Accent 160</td>
+    <td>Libri960 ~ Accent160</td>
     <td>6.61</td>
     <td>10.95</td>
     <td>15.33</td>
@@ -111,7 +111,7 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
     <td>13.13</td>
   </tr>
   <tr>
-    <td>Accent 160 + Libri160</td>
+    <td>Accent160 + Libri160</td>
     <td>6.95</td>
     <td>11.76</td>
     <td>13.05</td>
@@ -123,9 +123,9 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
     <td>13.14</td>
   </tr>
   <tr>
-    <td rowspan="5"><br><br><br>ESPnet</td>
-    <td>Accent 160</td>
-    <td>+0.3 RNNLM</td>
+    <td rowspan="5">ESPnet<br></td>
+    <td>Accent160</td>
+    <td>+0.3RNNLM</td>
     <td>5.26</td>
     <td>7.69</td>
     <td>9.96</td>
@@ -137,8 +137,8 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
     <td>8.63</td>
   </tr>
   <tr>
-    <td>Libri 960 ~ Accent 160</td>
-    <td>+0.3 RNNLM</td>
+    <td>Libri960 ~ Accent160</td>
+    <td>+0.3RNNLM</td>
     <td>4.6</td>
     <td>6.4</td>
     <td>7.42</td>
@@ -150,20 +150,20 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
     <td>6.92</td>
   </tr>
   <tr>
-    <td rowspan="3"><br><br>Accent 160 + Libri160</td>
-    <td>+0.3 RNNLM+0.3 CTC</td>
-    <td>4.76</td>
-    <td>7.81</td>
-    <td>7.71</td>
-    <td>6.36</td>
-    <td>6.4</td>
-    <td>7.23</td>
-    <td>10.77</td>
-    <td>8.01</td>
-    <td>7.38</td>
+    <td rowspan="3">Accent160 +Libri160<br></td>
+    <td>-</td>
+    <td>5.35</td>
+    <td>9.07</td>
+    <td>8.52</td>
+    <td>7.13</td>
+    <td>7.29</td>
+    <td>8.6</td>
+    <td>12.03</td>
+    <td>9.05</td>
+    <td>8.38</td>
   </tr>
   <tr>
-    <td>+0.3 RNNLM</td>
+    <td>+0.3RNNLM</td>
     <td>4.68</td>
     <td>7.59</td>
     <td>7.7</td>
@@ -175,16 +175,16 @@ ESPnet Transformer Model: 12 Encoder + 6 Decoder (simple self-attention, CTC joi
     <td>7.48</td>
   </tr>
   <tr>
-    <td></td>
-    <td>5.35</td>
-    <td>9.07</td>
-    <td>8.52</td>
-    <td>7.13</td>
-    <td>7.29</td>
-    <td>8.6</td>
-    <td>12.03</td>
-    <td>9.05</td>
-    <td>8.38</td>
+    <td>+0.3RNNLM+0.3CTC</td>
+    <td>4.76</td>
+    <td>7.81</td>
+    <td>7.71</td>
+    <td>6.36</td>
+    <td>6.4</td>
+    <td>7.23</td>
+    <td>10.77</td>
+    <td>8.01</td>
+    <td>7.38   </td>
   </tr>
 </tbody>
 </table>
