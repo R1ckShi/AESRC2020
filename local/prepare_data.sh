@@ -7,9 +7,11 @@ raw_data=rdata     # raw data with metadata, txt and wav
 data=kdata         # data transformed into kaldi format
 zipped_data=$raw_data/AESRC2020.zip 
 
-stage=7
+stage=1
 feature_cmd="run.pl"
 nj=50
+
+vocab_size=1000
 
 
 # unzip and rename each accent
@@ -33,7 +35,7 @@ if [ $stage -le 2 ];then
     find `pwd`/ -name '*.wav' > $data/data_all/wavpath
     awk -F'/' '{print $(NF-2)"-"$(NF-1)"-"$NF}' $data/data_all/wavpath | sed 's:\.wav::g' > $data/data_all/uttlist
     paste $data/data_all/uttlist $data/data_all/wavpath > $data/data_all/wav.scp
-    python local/preprocess.py $data/data_all/wav.scp $data/data_all/trans $data/data_all/utt2spk # faster than for in shell
+    python local/tools/preprocess.py $data/data_all/wav.scp $data/data_all/trans $data/data_all/utt2spk # faster than for in shell
     ./utils/utt2spk_to_spk2utt.pl $data/data_all/utt2spk > $data/data_all/spk2utt
 fi
 
@@ -58,7 +60,7 @@ fi
 # extracting filter-bank features and cmvn
 if [ $stage -le 4 ];then 
     ./utils/fix_data_dir.sh $data/data_all
-    ./steps/make_fbank.sh --cmd $feature_cmd --nj $nj --fbank-config $raw_data/fbank.conf $data/data_all $data/feats/log $data/feats/ark
+    ./steps/make_fbank.sh --cmd $feature_cmd --nj $nj --fbank-config conf/fbank.conf $data/data_all $data/feats/log $data/feats/ark
     ./steps/compute_cmvn_stats.sh $data/data_all $data/feats/log $data/feats/ark # for kaldi 
 fi
 
@@ -80,13 +82,11 @@ fi
 # generate label file and dump features for track2:E2E
 if [ $stage -le 6 ];then 
     for i in US UK IND CHN JPN PT RU KR;do 
-        local/dump.sh --cmd $feature_cmd --nj 3 --do_delta false \
+        local/tools/dump.sh --cmd $feature_cmd --nj 3 --do_delta false \
             $data/cv/$i/feats.scp $data/train/dump_cmvn.ark $data/cv/$i/dump/log $data/cv/$i/dump # for track2 e2e testing
     done 
-    local/dump.sh --cmd $feature_cmd --nj $nj  --do_delta false \
-        $data/train/feats.scp $data/train/dump_cmvn.ark $data/train/dump/log $data/train/dump
-    local/dump.sh --cmd $feature_cmd --nj $nj  --do_delta false \
-        $data/cv_all/feats.scp $data/train/dump_cmvn.ark $data/cv_all/dump/log $data/cv_all/dump # for track1 testing
+    local/tools/dump.sh --cmd $feature_cmd --nj $nj  --do_delta false \
+        $data/train/feats.scp $data/train/dump_cmvn.ark $data/train/dump/log $data/train/dump # for track2 e2e training
     # for track1, utterance-level CMVN is applied
     for data_set in train cv_all; do
         set_dir=$data/$data_set
@@ -95,7 +95,7 @@ if [ $stage -le 6 ];then
         cp $set_dir/spk2utt.utt $set_dir/utt2spk.utt
         compute-cmvn-stats --spk2utt=ark:$set_dir/spk2utt.utt scp:$set_dir/feats.scp \
             ark,scp:`pwd`/$set_dir/cmvn_utt.ark,$set_dir/cmvn_utt.scp
-        local/dump_spk_yzl23.sh --cmd slurm.pl --nj 48 \
+        local/tools/dump_spk_yzl23.sh --cmd slurm.pl --nj 48 \
             $set_dir/feats.scp $set_dir/cmvn_utt.scp \
             exp/dump_feats/$data_set $set_dir/dump_utt $set_dir/utt2spk.utt
     done
@@ -109,9 +109,39 @@ if [ $stage -le 7 ];then
         cut -d '-' -f 1 $data/$i/text | sed -e "s:^:<:g" -e "s:$:>:g" > $data/$i/accentlist
         paste $data/$i/uttlist $data/$i/accentlist > $data/$i/utt2accent 
         rm $data/$i/uttlist
-		local/data2json.sh --nj 20 --feat $data/$i/dump_utt/feats.scp --text $data/$i/utt2accent --oov 8 $data/$i local/files/ar.dict > $data/$i/ar.json
+		local/tools/data2json.sh --nj 20 --feat $data/$i/dump_utt/feats.scp --text $data/$i/utt2accent --oov 8 $data/$i local/files/ar.dict > $data/$i/ar.json
 	done
 fi    
+
+
+# generate label file for track2 e2e 
+if [ $stage -le 8 ];then 
+	# goolgle sentence piece toolkit is used to train a bpe model and decode
+	mkdir -p $data/bpe 
+	mkdir -p $data/lang 
+	# male sure you have installed sentencepiece successfully
+	spm_train  \
+		--input=$data/train/trans_upper \
+		--model_prefix=$data/bpe/bpe_${vocab_size} \
+		--vocab_size=$vocab_size \
+		--character_coverage=1.0 \
+		--model_type=unigram
+	python local/tools/word_frequency.py $data/train/trans_upper 0 $data/bpe/train 
+	cut -d ' ' -f 1 $data/bpe/train.enwf | awk '{if(NF==1)print $0}' > $data/bpe/wordlist.txt 
+    spm_encode \
+		--model=$data/bpe/bpe_${vocab_size}.model  \
+		--output_format=piece < $data/bpe/wordlist.txt > $data/bpe/bpelist.txt 
+	paste $data/bpe/wordlist.txt $data/bpe/bpelist.txt > $data/lang/lexicon.txt
+	sed -i 's:▁ :▁:g' $data/lang/lexicon.txt 
+	python local/tools/apply_lexicon.py $data/lang/lexicon.txt $data/train/text $data/train/utt2tokens "<unk>" $data/train/.warning $data/lang/units.txt 
+	local/tools/data2json.sh --nj 20 --feat $data/train/dump/feats.scp --text $data/train/utt2tokens --oov 0 $data/train $data/lang/units.txt > $data/train/asr.json || exit 1;
+	for i in US UK IND CHN JPN PT RU KR; do 
+		# units.txt generate form cv set aborted  
+		python local/tools/apply_lexicon.py $data/lang/lexicon.txt $data/cv/$i/text $data/cv/$i/utt2tokens "<unk>" $data/cv/$i/.warning $data/cv/${i}/.units.txt  || exit 1;
+		local/tools/data2json.sh --nj 20 --feat $data/cv/$i/dump/feats.scp --text $data/cv/$i/utt2tokens --oov 0 $data/cv/$i $data/lang/units.txt > $data/cv/$i/asr.json
+	done 
+
+fi
 
 echo "local/prepare_data.sh succeeded"
 exit 0;
