@@ -3,11 +3,11 @@
 # Copyright 2020 Audio, Speech and Language Processing Group @ NWPU (Author: Xian Shi)
 # Apache 2.0
 
-raw_data=rdata     # raw data with metadata, txt and wav
-data=kdata         # data transformed into kaldi format
+raw_data=$1     # raw data with metadata, txt and wav
+data=$2         # data transformed into kaldi format
 zipped_data=$raw_data/AESRC2020.zip 
 
-stage=1
+stage=2
 feature_cmd="run.pl"
 nj=50
 
@@ -47,7 +47,9 @@ if [ $stage -le 3 ];then
     # turn "." in specific abbreviations into "<m>" tag
     sed -i -e 's: MR\.: MR<m>:g' -e 's: MRS\.: MRS<m>:g' -e 's: MS\.: MS<m>:g' \
         -e 's:^MR\.:MR<m>:g' -e 's:^MRS\.:MRS<m>:g' -e 's:^MS\.:MS<m>:g' $data/data_all/trans_upper 
-    sed -i 's:ST\.:STREET:g' $data/data_all/trans_upper 
+	# fix bug
+    sed -i 's:^ST\.:STREET:g' $data/data_all/trans_upper 
+    sed -i 's: ST\.: STREET:g' $data/data_all/trans_upper 
     # punctuation marks
     sed -i "s%,\|\.\|?\|!\|;\|-\|:\|,'\|\.'\|?'\|!'\| '% %g" $data/data_all/trans_upper
     sed -i 's:<m>:.:g' $data/data_all/trans_upper
@@ -56,7 +58,7 @@ if [ $stage -le 3 ];then
     paste $data/data_all/uttlist $data/data_all/trans_upper > $data/data_all/text
 fi
 
-
+exit 1;
 # extracting filter-bank features and cmvn
 if [ $stage -le 4 ];then 
     ./utils/fix_data_dir.sh $data/data_all
@@ -64,7 +66,7 @@ if [ $stage -le 4 ];then
     ./steps/compute_cmvn_stats.sh $data/data_all $data/feats/log $data/feats/ark # for kaldi 
 fi
 
-
+exit 1;
 # divide development set for cross validation
 if [ $stage -le 5 ];then 
     for i in US UK IND CHN JPN PT RU KR;do 

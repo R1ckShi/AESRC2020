@@ -107,6 +107,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
 	        --config ${train_config} \
 	        --ngpu $ngpu \
 	        --backend ${backend} \
+			--preprocess-conf $preprocess_config \
 	        --outdir ${expdir}/results \
 	        --tensorboard-dir tensorboard/${expname} \
 	        --debugmode ${debugmode} \
