@@ -215,3 +215,8 @@ class E2E(ASRInterface, torch.nn.Module):
             if isinstance(m, MultiHeadedAttention):
                 ret[name] = m.attn.cpu().numpy()
         return ret
+
+    # fix calculate_all_ctc_probs method not implemented bug
+    def calculate_all_ctc_probs(self, xs_pad, ilens, ys_pad):
+        return None
+
